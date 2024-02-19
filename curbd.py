@@ -277,7 +277,7 @@ def trainMultiRegionRNNCUDA(activity, dtData=1, dtFactor=1, g=1.5, tauRNN=0.01, 
 
     # set up target training data
     Adata = activity.copy()
-    Adata = Adata/Adata.max()
+    Adata = cp.array(Adata/Adata.max())
     Adata = cp.minimum(Adata, 0.999)
     Adata = cp.maximum(Adata, -0.999)
 
