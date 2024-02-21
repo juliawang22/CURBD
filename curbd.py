@@ -177,6 +177,7 @@ def trainMultiRegionRNN(activity, dtData=1, dtFactor=1, g=1.5, tauRNN=0.01,
         chi2s.append(chi2)
         if verbose:
             print('trial=%d pVar=%f chi2=%f' % (nRun, pVar, chi2))
+
         if fig:
             fig.clear()
             ax = fig.add_subplot(gs[0, 0])
@@ -347,7 +348,7 @@ def trainMultiRegionRNNCUDA(activity, dtData=1, dtFactor=1, g=1.5, tauRNN=0.01, 
                     J[:, iTarget.flatten()] = J[:, iTarget.reshape((number_units))] - c*np.outer(err.flatten(), k.flatten())
 
         rModelSample = RNN[iTarget, :][:, iModelSample]
-        distance = np.linalg.norm(Adata[iTarget, :] - rModelSample)
+        distance = cp.linalg.norm(Adata[iTarget, :] - rModelSample)
         pVar = 1 - (distance / (math.sqrt(len(iTarget) * len(tData))
                     * stdData)) ** 2
         pVars.append(pVar)
@@ -358,11 +359,11 @@ def trainMultiRegionRNNCUDA(activity, dtData=1, dtFactor=1, g=1.5, tauRNN=0.01, 
             fig.clear()
             ax = fig.add_subplot(gs[0, 0])
             ax.axis('off')
-            ax.imshow(Adata[iTarget, :])
+            ax.imshow(Adata[iTarget, :].asnumpy())
             ax.set_title('real rates')
 
             ax = fig.add_subplot(gs[0, 1])
-            ax.imshow(RNN, aspect='auto')
+            ax.imshow(RNN.asnumpy(), aspect='auto')
             ax.set_title('model rates')
             ax.axis('off')
 
@@ -376,8 +377,8 @@ def trainMultiRegionRNNCUDA(activity, dtData=1, dtFactor=1, g=1.5, tauRNN=0.01, 
 
             ax = fig.add_subplot(gs[:, 2:4])
             idx = npr.choice(range(len(iTarget)))
-            ax.plot(tRNN, RNN[iTarget[idx], :])
-            ax.plot(tData, Adata[iTarget[idx], :])
+            ax.plot(tRNN.asnumpy(), RNN[iTarget[idx].asnumpy(), :])
+            ax.plot(tData.asnumpy(), Adata[iTarget[idx], :].asnumpy())
             ax.set_title(nRun)
             fig.show()
             plt.pause(0.05)
@@ -398,14 +399,14 @@ def trainMultiRegionRNNCUDA(activity, dtData=1, dtFactor=1, g=1.5, tauRNN=0.01, 
 
     out = {}
     out['regions'] = regions
-    out['RNN'] = RNN
-    out['tRNN'] = tRNN
-    out['dtRNN'] = dtRNN
-    out['Adata'] = Adata
-    out['tData'] = tData
-    out['dtData'] = dtData
-    out['J'] = J
-    out['J0'] = J0
+    out['RNN'] = RNN.asnumpy()
+    out['tRNN'] = tRNN.asnumpy()
+    out['dtRNN'] = dtRNN.asnumpy()
+    out['Adata'] = Adata.asnumpy()
+    out['tData'] = tData.asnumpy()
+    out['dtData'] = dtData.asnumpy()
+    out['J'] = J.asnumpy()
+    out['J0'] = J0.asnumpy()
     out['chi2s'] = chi2s
     out['pVars'] = pVars
     out['stdData'] = stdData
